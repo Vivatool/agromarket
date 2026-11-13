@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вхід — АгроМаркет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍅</text></svg>">
+</head>
+<body>
+<div id="site-header"></div>
+<main><div class="container">
+<div class="auth card">
+  <h1>Вхід</h1>
+  <div id="login-msg"></div>
+  <form id="login" novalidate>
+    <div class="field"><label for="email">Email</label><input type="email" id="email" autocomplete="username"></div>
+    <div class="field"><label for="pass">Пароль</label><input type="password" id="pass" autocomplete="current-password"></div>
+    <button class="btn" type="submit" style="width:100%">Увійти</button>
+  </form>
+  <p style="margin-top:18px">Ще немає акаунта? <a href="register.html">Зареєструватися</a></p>
+</div>
+</div></main>
+<div id="site-footer"></div>
+<script src="js/app.js"></script>
+<script>
+document.getElementById('login').addEventListener('submit', e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  let ok = fieldErr(document.getElementById('email'), email ? '' : 'Вкажіть email');
+  ok = fieldErr(document.getElementById('pass'), pass ? '' : 'Вкажіть пароль') && ok;
+  if (!ok) return;
+  const u = users().find(x => x.email.toLowerCase() === email.toLowerCase() && x.password === pass);
+  if (!u) { document.getElementById('login-msg').innerHTML = '<div class="alert bad">Неправильний email або пароль</div>'; return; }
+  DB.set('session', u.email);
+  location.href = param('next') || 'account.html';
+});
+</script>
+</body>
+</html>

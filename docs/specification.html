@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>АгроМаркет — специфікація вимог для тестування</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F7F5EE;color:#3D4A43;font-family:Inter,Arial,sans-serif;font-size:17px;line-height:1.55}
+.wrap{max-width:920px;margin:0 auto;padding:32px 20px 64px}
+h1,h2{font-family:Rubik,Arial,sans-serif;color:#1F3A2E}
+h1{font-size:34px;margin:0 0 6px}
+h2{font-size:24px;margin:36px 0 10px;padding-top:10px;border-top:2px solid #E2DDCF}
+table{width:100%;border-collapse:collapse;background:#FFFDF8;border:1px solid #E2DDCF;border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid #E2DDCF;vertical-align:top}
+th{background:#1F3A2E;color:#F7F5EE;font-weight:600}
+td:first-child{white-space:nowrap;font-weight:700;color:#1F3A2E;width:90px}
+.box{background:#FBEFD6;border:1px solid #EBD2A0;border-radius:14px;padding:14px 18px;margin:16px 0}
+.btn{font:inherit;font-weight:700;border:none;border-radius:12px;padding:12px 20px;cursor:pointer;background:#E3A23B;color:#1F3A2E;text-decoration:none;display:inline-block}
+.btn.dark{background:#1F3A2E;color:#F7F5EE}
+code{background:#ECF0E6;padding:2px 6px;border-radius:6px}
+#done{color:#2C6E49;font-weight:700;margin-left:12px}
+</style>
+</head>
+<body><div class="wrap">
+<h1>АгроМаркет — специфікація вимог</h1>
+<p>Версія 1.0 · Документ для команди тестування</p>
+<p><a class="btn dark" href="../index.html">Відкрити сайт</a></p>
+
+<div class="box"><b>Скидання тестових даних.</b> Сайт зберігає акаунти, кошик і замовлення у вашому браузері. Щоб повернути все до початкового стану, натисніть кнопку нижче.<br><br>
+<button class="btn" id="reset">Скинути тестові дані</button><span id="done"></span></div>
+
+<h2>Тестові акаунти</h2>
+<p>Пароль для всіх: <code>Pomidor1</code></p>
+<table>
+<tr><th>Email</th><th>Ім’я</th><th>Виконаних замовлень</th></tr>
+<tr><td>oksana@agro.test</td><td>Оксана Коваль</td><td>0</td></tr>
+<tr><td>petro@agro.test</td><td>Петро Шевчук</td><td>2</td></tr>
+<tr><td>hanna@agro.test</td><td>Ганна Мельник</td><td>3</td></tr>
+<tr><td>ivan@agro.test</td><td>Іван Бондар</td><td>8 (має замовлення в усіх статусах)</td></tr>
+</table>
+
+<h2>1. Реєстрація і вхід</h2>
+<table>
+<tr><th>ID</th><th>Вимога</th></tr>
+<tr><td>REG-1</td><td>Ім’я та прізвище: обов’язкове, від 2 до 30 символів. Дозволені літери (українські та латинські), апостроф, дефіс і пробіл.</td></tr>
+<tr><td>REG-2</td><td>Email: обов’язковий, у форматі name@domain.ua. Email має бути унікальним; регістр літер не має значення (Oksana@agro.test і oksana@agro.test — той самий email).</td></tr>
+<tr><td>REG-3</td><td>Вік: обов’язковий, цілі числа від 18 до 99 включно.</td></tr>
+<tr><td>REG-4</td><td>Пароль: від 8 до 20 символів включно, щонайменше одна цифра і одна велика літера.</td></tr>
+<tr><td>REG-5</td><td>Поле «Повторіть пароль» має збігатися з паролем.</td></tr>
+<tr><td>REG-6</td><td>Без згоди з правилами магазину реєстрація неможлива.</td></tr>
+<tr><td>REG-7</td><td>Після успішної реєстрації користувач потрапляє в особистий кабінет і бачить «Вітаємо, &lt;ім’я&gt;! Реєстрацію завершено.»</td></tr>
+<tr><td>REG-8</td><td>Якщо поле заповнено неправильно, під ним показується повідомлення про помилку.</td></tr>
+<tr><td>LOG-1</td><td>Вхід за email і паролем. Регістр email не має значення. При помилці — «Неправильний email або пароль».</td></tr>
+</table>
+
+<h2>2. Каталог і товар</h2>
+<table>
+<tr><th>ID</th><th>Вимога</th></tr>
+<tr><td>CAT-1</td><td>Фільтр за категоріями: Усі, Овочі, Розсада, Інше.</td></tr>
+<tr><td>CAT-2</td><td>Пошук за назвою товару, без урахування регістру літер.</td></tr>
+<tr><td>CAT-3</td><td>Сортування за ціною: «Спочатку дешевші» і «Спочатку дорожчі».</td></tr>
+<tr><td>PRD-1</td><td>Овочі і мед продаються від 1 до 50 кг, цілими числами.</td></tr>
+<tr><td>PRD-2</td><td>Розсада продається від 10 до 200 шт., цілими числами.</td></tr>
+<tr><td>PRD-3</td><td>Розсада: якщо в кошику від 100 шт. одного товару — діє оптова ціна.</td></tr>
+<tr><td>PRD-4</td><td>Кількість одного товару в кошику не може перевищувати максимум (50 кг або 200 шт.) — зокрема, якщо товар додати кілька разів.</td></tr>
+</table>
+
+<h2>3. Кошик, знижки і доставка</h2>
+<table>
+<tr><th>ID</th><th>Вимога</th></tr>
+<tr><td>PRC-1</td><td>Постійний клієнт (3 і більше виконаних замовлень) отримує знижку 5%.</td></tr>
+<tr><td>PRC-2</td><td>Якщо вартість товарів від 500 грн — доставка безкоштовна, інакше 80 грн.</td></tr>
+<tr><td>PRC-3</td><td>Постійний клієнт із вартістю товарів від 500 грн отримує знижку 10% і безкоштовну доставку.</td></tr>
+<tr><td>PRC-4</td><td>Промокод SUMMER дає знижку 7%.</td></tr>
+<tr><td>PRC-5</td><td>Знижки рахуються від вартості товарів; доставка не знижується.</td></tr>
+</table>
+
+<h2>4. Оформлення замовлення</h2>
+<table>
+<tr><th>ID</th><th>Вимога</th></tr>
+<tr><td>ORD-1</td><td>Оформити замовлення може лише авторизований користувач. Неавторизованого переводимо на сторінку входу.</td></tr>
+<tr><td>ORD-2</td><td>Телефон: обов’язковий, у форматі +380 і 9 цифр.</td></tr>
+<tr><td>ORD-3</td><td>Доставка лише в Київську, Житомирську і Черкаську області.</td></tr>
+<tr><td>ORD-4</td><td>Дата доставки: від завтра до +7 днів від сьогодні.</td></tr>
+<tr><td>ORD-5</td><td>Час доставки: з 8:00 до 20:00 включно.</td></tr>
+<tr><td>ORD-6</td><td>Адреса обов’язкова.</td></tr>
+<tr><td>ORD-7</td><td>Після оформлення кошик очищується, замовлення з’являється в кабінеті зі статусом «Нове».</td></tr>
+</table>
+
+<h2>5. Статуси замовлення</h2>
+<p><b>Нове → Оплачено → Зібрано → Відправлено → Доставлено.</b> «Доставлено» і «Скасовано» — кінцеві статуси.</p>
+<table>
+<tr><th>ID</th><th>Вимога</th></tr>
+<tr><td>STS-1</td><td>Клієнт оплачує замовлення в статусі «Нове» з особистого кабінету.</td></tr>
+<tr><td>STS-2</td><td>Клієнт може скасувати замовлення лише в статусах «Нове» та «Оплачено».</td></tr>
+<tr><td>STS-3</td><td>При скасуванні оплаченого замовлення показується «Кошти буде повернено протягом 3 днів».</td></tr>
+<tr><td>STS-4</td><td>Склад збирає лише оплачені замовлення (Панель складу).</td></tr>
+<tr><td>STS-5</td><td>Кожне доставлене замовлення збільшує лічильник виконаних замовлень клієнта.</td></tr>
+</table>
+
+<h2>6. Калькулятор пального</h2>
+<table>
+<tr><th>ID</th><th>Вимога</th></tr>
+<tr><td>FUEL-1</td><td>Площа: від 0,1 до 1000 га, один знак після коми. Як роздільник приймаються кома і крапка.</td></tr>
+<tr><td>FUEL-2</td><td>Норма витрати: від 1,0 до 50,0 л/га, один знак після коми.</td></tr>
+<tr><td>FUEL-3</td><td>Витрата = площа × норма, округлення до 0,1 л.</td></tr>
+<tr><td>FUEL-4</td><td>«Важкий ґрунт» збільшує норму на 15%, «Нічна зміна» — на 10%.</td></tr>
+<tr><td>FUEL-5</td><td>Якщо витрата більша за 300 л — попередження «Потрібна дозаправка в полі».</td></tr>
+</table>
+
+<h2>7. Загальні вимоги</h2>
+<table>
+<tr><th>ID</th><th>Вимога</th></tr>
+<tr><td>GEN-1</td><td>Усі посилання в шапці і підвалі ведуть на робочі сторінки.</td></tr>
+<tr><td>GEN-2</td><td>Підписка на розсилку приймає лише коректний email.</td></tr>
+<tr><td>GEN-3</td><td>Сайт коректно працює на телефоні (ширина від 360 px): доступне меню, жодного горизонтального прокручування.</td></tr>
+<tr><td>GEN-4</td><td>Під час роботи сайту в консолі браузера немає помилок.</td></tr>
+</table>
+</div>
+<script src="../js/app.js"></script>
+<script>
+document.getElementById('reset').onclick = () => {
+  try { Object.keys(localStorage).filter(k => k.startsWith('am_')).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+  seedData(true);
+  document.getElementById('done').textContent = 'Готово! Дані відновлено.';
+};
+</script>
+</body>
+</html>

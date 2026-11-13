@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Товар — АгроМаркет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍅</text></svg>">
+</head>
+<body>
+<div id="site-header"></div>
+<main><div class="container">
+<div id="pdp"></div>
+</div></main>
+<div id="site-footer"></div>
+<script src="js/app.js"></script>
+<script>
+const p = product(param('id'));
+if (!p) {
+  document.getElementById('pdp').innerHTML = '<h1>Товар не знайдено</h1><p><a href="catalog.html">Повернутися до каталогу</a></p>';
+} else {
+  document.title = p.name + ' — АгроМаркет';
+  const unitWord = p.unit === 'кг' ? 'кг' : 'шт.';
+  document.getElementById('pdp').innerHTML = `
+  <div class="breadcrumbs"><a href="index.html">Головна</a> / <a href="catalog.html">Каталог</a> / ${esc(p.name)}</div>
+  <div class="pdp">
+    <div class="pic" style="background:${p.bg}">${p.emoji}</div>
+    <div>
+      <span class="tag">${CATS[p.cat]}</span>
+      <h1 style="margin-top:10px">${esc(p.name)}</h1>
+      <div class="price">${money(p.price)} <span style="font-size:20px;color:var(--muted)">/ ${unitWord}</span></div>
+      ${p.wholesale ? `<p class="alert warn" style="margin-top:12px">Оптова ціна від ${p.wholesaleFrom} шт.: ${money(p.wholesale)} / шт.</p>` : ''}
+      <p>${esc(p.desc)}</p>
+      <div class="field"><label for="qty">Кількість, ${unitWord}</label>
+        <div class="qty"><button type="button" id="minus" aria-label="Менше">−</button><input id="qty" type="text" inputmode="numeric" value="${p.min}"><button type="button" id="plus" aria-label="Більше">+</button></div>
+        <div class="hint">Можна замовити від ${p.min} до ${p.max} ${unitWord}</div>
+      </div>
+      <p>Сума: <b id="line-sum"></b></p>
+      <button class="btn" id="add">Додати в кошик</button>
+      <table class="specs">
+        <tr><td>Походження</td><td>${esc(p.origin)}</td></tr>
+        <tr><td>Вага одиниці</td><td>${esc(p.weight)}</td></tr>
+        <tr><td>Одиниця продажу</td><td>${unitWord}</td></tr>
+      </table>
+    </div>
+  </div>`;
+  const qty = document.getElementById('qty');
+  const read = () => qty.value.trim();
+  function sum() { const v = read(); document.getElementById('line-sum').textContent = /^\d+$/.test(v) ? money(linePrice(p, +v) * +v) : '—'; }
+  document.getElementById('minus').onclick = () => { const v = parseInt(read()) || p.min; qty.value = Math.max(p.min, v - 1); sum(); };
+  document.getElementById('plus').onclick = () => { const v = parseInt(read()) || p.min; qty.value = Math.min(p.max, v + 1); sum(); };
+  qty.addEventListener('input', () => { fieldErr(qty, ''); sum(); });
+  sum();
+  document.getElementById('add').onclick = () => {
+    const v = read();
+    if (!v) return fieldErr(qty, 'Вкажіть кількість');
+    if (!/^\d+$/.test(v)) return fieldErr(qty, 'Кількість має бути цілим числом');
+    if (+v < p.min || +v > p.max) return fieldErr(qty, `Можна замовити від ${p.min} до ${p.max} ${unitWord}`);
+    fieldErr(qty, '');
+    addToCart(p.id, +v);
+    toast(`Додано в кошик: ${p.name}, ${v} ${unitWord}`);
+  };
+}
+</script>
+</body>
+</html>

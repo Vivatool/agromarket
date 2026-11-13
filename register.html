@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Реєстрація — АгроМаркет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍅</text></svg>">
+</head>
+<body>
+<div id="site-header"></div>
+<main><div class="container">
+<div class="auth card">
+  <h1>Реєстрація</h1>
+  <p class="hint" style="margin-top:-6px;margin-bottom:18px">Створіть акаунт, щоб оформлювати замовлення і отримувати знижки.</p>
+  <form id="reg" novalidate>
+    <div class="field"><label for="name">Ім’я та прізвище</label><input type="text" id="name" autocomplete="off"></div>
+    <div class="field"><label for="email">Email</label><input type="email" id="email" autocomplete="off"></div>
+    <div class="field"><label for="age">Вік</label><input type="text" id="age" inputmode="numeric" autocomplete="off"><div class="hint">Реєстрація доступна з 18 до 99 років</div></div>
+    <div class="field"><label for="pass">Пароль</label><input type="password" id="pass" autocomplete="new-password"><div class="hint">8–20 символів, щонайменше одна цифра і одна велика літера</div></div>
+    <div class="field"><label for="pass2">Повторіть пароль</label><input type="password" id="pass2" autocomplete="new-password"></div>
+    <div class="field"><label class="checkline"><input type="checkbox" id="agree"> Я погоджуюся з правилами магазину</label></div>
+    <button class="btn" type="submit" style="width:100%">Зареєструватися</button>
+  </form>
+  <p style="margin-top:18px">Вже є акаунт? <a href="login.html">Увійти</a></p>
+</div>
+</div></main>
+<div id="site-footer"></div>
+<script src="js/app.js"></script>
+<script>
+document.getElementById('reg').addEventListener('submit', e => {
+  e.preventDefault();
+  const g = id => document.getElementById(id);
+  const name = g('name').value.trim(), email = g('email').value.trim(), age = g('age').value.trim(), pass = g('pass').value, pass2 = g('pass2').value;
+  let ok = true;
+  let err = '';
+  if (!name) err = 'Вкажіть ім’я';
+  else if (name.length < 2 || name.length > 30) err = 'Ім’я має містити від 2 до 30 символів';
+  else if (!/^[A-Za-zА-Яа-яІіЇїЄєҐґ\- ]+$/.test(name)) err = 'Ім’я може містити лише літери';
+  ok = fieldErr(g('name'), err) && ok;
+  err = '';
+  if (!email) err = 'Вкажіть email';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) err = 'Неправильний формат email';
+  else if (users().some(u => u.email === email)) err = 'Користувач з таким email вже зареєстрований';
+  ok = fieldErr(g('email'), err) && ok;
+  err = '';
+  if (!age) err = 'Вкажіть вік';
+  else if (!/^\d+$/.test(age)) err = 'Вік має бути цілим числом';
+  else if (!(+age >= 18 && +age < 99)) err = 'Реєстрація доступна з 18 до 99 років';
+  ok = fieldErr(g('age'), err) && ok;
+  err = '';
+  if (!pass) err = 'Вкажіть пароль';
+  else if (pass.length < 8 || pass.length >= 20) err = 'Пароль має містити від 8 до 20 символів';
+  else if (!/\d/.test(pass) || !/[A-ZА-ЯІЇЄҐ]/.test(pass)) err = 'Пароль має містити цифру і велику літеру';
+  ok = fieldErr(g('pass'), err) && ok;
+  ok = fieldErr(g('pass2'), pass2 !== pass ? 'Паролі не збігаються' : '') && ok;
+  ok = fieldErr(g('agree'), g('agree').checked ? '' : 'Потрібна згода з правилами') && ok;
+  if (!ok) return;
+  const list = users();
+  list.push({ name, email, age: +age, password: pass, prevOrders: 0 });
+  DB.set('users', list);
+  DB.set('session', email);
+  location.href = 'account.html?welcome=1';
+});
+</script>
+</body>
+</html>

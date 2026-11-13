@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Оформлення замовлення — АгроМаркет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍅</text></svg>">
+</head>
+<body>
+<div id="site-header"></div>
+<main><div class="container">
+<div class="breadcrumbs"><a href="index.html">Головна</a> / <a href="cart.html">Кошик</a> / Оформлення</div>
+<h1>Оформлення замовлення</h1>
+<div id="co-root"></div>
+</div></main>
+<div id="site-footer"></div>
+<script src="js/app.js"></script>
+<script>
+if (requireLogin()) {
+  const u = currentUser(); const lines = cart();
+  const root = document.getElementById('co-root');
+  if (!lines.length) root.innerHTML = '<div class="card"><p>Кошик порожній — нема чого оформлювати.</p><a class="btn" href="catalog.html">До каталогу</a></div>';
+  else {
+    const t = calcTotals(lines, u, DB.get('promo', ''));
+    root.innerHTML = `<div class="layout-2"><form class="card" id="co" novalidate>
+      <h3>Контактні дані</h3>
+      <div class="field"><label for="name">Ім’я та прізвище</label><input type="text" id="name" value="${esc(u.name)}"></div>
+      <div class="field"><label for="phone">Телефон</label><input type="tel" id="phone" placeholder="+380XXXXXXXXX"><div class="hint">Формат: +380 і 9 цифр</div></div>
+      <h3 style="margin-top:24px">Доставка</h3>
+      <div class="field"><label for="region">Область</label><select id="region"><option value="">— оберіть —</option>${REGIONS.map(r => `<option>${r}</option>`).join('')}</select></div>
+      <div class="field"><label for="date">Дата доставки</label><input type="date" id="date"><div class="hint">Від завтра до 7 днів наперед</div></div>
+      <div class="field"><label for="time">Час доставки</label><input type="time" id="time"><div class="hint">З 8:00 до 20:00</div></div>
+      <div class="field"><label for="addr">Адреса</label><input type="text" id="addr" placeholder="Населений пункт, вулиця, будинок"></div>
+      <h3 style="margin-top:24px">Оплата</h3>
+      <div class="radio-group field"><label><input type="radio" name="pay" value="card" checked> Карткою онлайн після підтвердження</label><label><input type="radio" name="pay" value="cash"> Готівкою або карткою при отриманні</label></div>
+      <div class="field"><label for="comment">Коментар (необов’язково)</label><textarea id="comment"></textarea></div>
+      <button class="btn" type="submit">Підтвердити замовлення</button>
+    </form>
+    <div class="card summary"><h3>Разом</h3>
+      ${lines.map(l => { const p = product(l.id); return `<div class="row"><span>${esc(p.name)} × ${l.qty} ${p.unit}</span><span>${money(linePrice(p, l.qty) * l.qty)}</span></div>`; }).join('')}
+      <div class="row"><span>Знижка ${t.disc}%</span><span>−${money(t.discSum)}</span></div>
+      <div class="row"><span>Доставка</span><span>${t.delivery ? money(t.delivery) : 'безкоштовно'}</span></div>
+      <div class="row total"><span>До сплати</span><span>${money(t.total)}</span></div></div></div>`;
+    document.getElementById('co').addEventListener('submit', e => {
+      e.preventDefault();
+      const g = id => document.getElementById(id);
+      let ok = true;
+      const name = g('name').value.trim();
+      ok = fieldErr(g('name'), name.length < 2 ? 'Вкажіть ім’я та прізвище' : '') && ok;
+      const phone = g('phone').value.replace(/\s/g, '');
+      ok = fieldErr(g('phone'), !phone ? 'Вкажіть телефон' : (!/^\+380\d{9}$/.test(phone) ? 'Неправильний формат телефону' : '')) && ok;
+      const region = g('region').value;
+      ok = fieldErr(g('region'), !region ? 'Оберіть область' : (!DELIVERY_REGIONS.includes(region) ? 'На жаль, у цю область ми поки не доставляємо' : '')) && ok;
+      const date = g('date').value;
+      ok = fieldErr(g('date'), !date ? 'Оберіть дату доставки' : (date < dayISO(0) || date > dayISO(7) ? 'Доставка можлива від завтра до 7 днів наперед' : '')) && ok;
+      const time = g('time').value;
+      ok = fieldErr(g('time'), !time ? 'Оберіть час доставки' : (time < '08:00' || time > '20:00' ? 'Доставка можлива з 8:00 до 20:00' : '')) && ok;
+      const addr = g('addr').value.trim();
+      ok = fieldErr(g('addr'), !addr ? 'Вкажіть адресу' : '') && ok;
+      if (!ok) { $('.has-err input, .has-err select').focus(); return; }
+      const orders = DB.get('orders', []);
+      const id = orders.reduce((m, o) => Math.max(m, o.id), 1000) + 1;
+      orders.unshift({ id, email: u.email, items: lines.map(l => { const p = product(l.id); return { id: p.id, name: p.name, qty: l.qty, unit: p.unit, price: linePrice(p, l.qty) }; }),
+        goods: t.goods, disc: t.disc, delivery: t.delivery, total: t.total, status: 'new', region, date, time, addr, phone, pay: $('input[name=pay]:checked').value, created: dayISO(0) });
+      DB.set('orders', orders); DB.set('cart', []); DB.set('promo', '');
+      location.href = 'account.html?new=' + id;
+    });
+  }
+}
+</script>
+</body>
+</html>

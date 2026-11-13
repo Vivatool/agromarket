@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор пального — АгроМаркет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍅</text></svg>">
+</head>
+<body>
+<div id="site-header"></div>
+<main><div class="container">
+<div class="breadcrumbs"><a href="index.html">Головна</a> / Калькулятор пального</div>
+<h1>Калькулятор пального</h1>
+<p style="max-width:720px">Розрахуйте, скільки дизельного пального потрібно на обробку поля. Безкоштовний сервіс для фермерів.</p>
+<div class="layout-2">
+<form class="card calc" id="fuel" novalidate>
+  <div class="field"><label for="area">Площа, га</label><input type="text" id="area" inputmode="decimal" autocomplete="off"><div class="hint">Від 0,1 до 1000 га, один знак після коми</div></div>
+  <div class="field"><label for="norm">Норма витрати, л/га</label><input type="text" id="norm" inputmode="decimal" autocomplete="off"><div class="hint">Від 1,0 до 50,0 л/га</div></div>
+  <label class="checkline"><input type="checkbox" id="heavy"> Важкий ґрунт (+15% до норми)</label>
+  <label class="checkline"><input type="checkbox" id="night"> Нічна зміна (+10% до норми)</label>
+  <button class="btn" type="submit">Розрахувати</button>
+  <div id="res" style="margin-top:20px"></div>
+</form>
+<div class="card"><h3>Як це працює</h3>
+  <p>Витрата = площа × норма витрати з урахуванням надбавок. Результат округлюється до 0,1 л.</p>
+  <p>Якщо витрата більша за 300 л (об’єм бака трактора), ми попередимо, що знадобиться дозаправка в полі.</p>
+</div>
+</div>
+</div></main>
+<div id="site-footer"></div>
+<script src="js/app.js"></script>
+<script>
+function num(input, min, max, what) {
+  const raw = input.value.trim();
+  if (!raw) { fieldErr(input, 'Вкажіть ' + what); return null; }
+  const s = raw.replace('.', '').replace(',', '.');
+  if (!/^\d+(\.\d+)?$/.test(s)) { fieldErr(input, 'Введіть число'); return null; }
+  if (/\.\d\d/.test(s)) { fieldErr(input, 'Не більше одного знака після коми'); return null; }
+  const v = parseFloat(s);
+  if (v < min || v > max) { fieldErr(input, `Значення має бути від ${String(min.toFixed(1)).replace('.', ',')} до ${String(max.toFixed(1)).replace('.', ',')}`); return null; }
+  fieldErr(input, ''); return v;
+}
+const f1 = n => n.toFixed(1).replace('.', ',');
+document.getElementById('fuel').addEventListener('submit', e => {
+  e.preventDefault();
+  const a = num(document.getElementById('area'), 0.1, 1000, 'площу');
+  const n = num(document.getElementById('norm'), 1, 50, 'норму витрати');
+  if (a === null || n === null) { document.getElementById('res').innerHTML = ''; return; }
+  let k = 1;
+  if (document.getElementById('heavy').checked) k *= 1.15;
+  if (document.getElementById('night').checked) k *= 1.10;
+  const r = Math.round(a * n * k * 10) / 10;
+  let h = `<p class="hint">${f1(a)} га × ${f1(n)} л/га${k > 1 ? ' + надбавка ' + f1((k - 1) * 100) + '%' : ''}</p><p style="margin:0">Потрібно пального:</p><div class="result-big">${f1(r)} л</div>`;
+  if (r >= 300) h += '<div class="alert warn" style="margin-top:14px">⚠️ Потрібна дозаправка в полі</div>';
+  document.getElementById('res').innerHTML = h;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Панель складу — АгроМаркет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍅</text></svg>">
+</head>
+<body>
+<div id="site-header"></div>
+<main><div class="container">
+<div class="breadcrumbs"><a href="index.html">Головна</a> / Панель складу</div>
+<h1>Панель складу</h1>
+<p class="hint" style="margin-top:-6px">Для працівників складу і кур’єрів: збирання, відправлення і доставка замовлень.</p>
+<div id="wh-msg"></div>
+<div class="filters" id="wh-filter"></div>
+<div id="wh-list"></div>
+</div></main>
+<div id="site-footer"></div>
+<script src="js/app.js"></script>
+<script>
+const NEXT = {
+  new: [['Зібрати', 'packed']],
+  paid: [['Зібрати', 'packed']],
+  packed: [['Передати кур’єру', 'shipped']],
+  shipped: [['Доставлено', 'done']],
+  done: [], cancel: []
+};
+let filter = 'all';
+function drawWh() {
+  const all = DB.get('orders', []);
+  const counts = Object.keys(STATUS).reduce((m, k) => (m[k] = all.filter(o => o.status === k).length, m), {});
+  document.getElementById('wh-filter').innerHTML = `<button class="chip ${filter === 'all' ? 'on' : ''}" data-f="all">Усі (${all.length})</button>` +
+    Object.keys(STATUS).map(k => `<button class="chip ${filter === k ? 'on' : ''}" data-f="${k}">${STATUS[k].label} (${counts[k]})</button>`).join('');
+  $$('#wh-filter .chip').forEach(b => b.onclick = () => { filter = b.dataset.f; drawWh(); });
+  const list = all.filter(o => filter === 'all' || o.status === filter);
+  document.getElementById('wh-list').innerHTML = list.map(o => `<div class="order"><div class="top"><b>№${o.id} · ${esc(o.email)}</b><span class="status ${STATUS[o.status].cls}">${STATUS[o.status].label}</span></div>
+    <div class="items">${o.items.map(i => `${esc(i.name)} × ${i.qty} ${i.unit}`).join(', ')}</div>
+    <div class="hint">${esc(o.region)} обл. · ${o.date} ${o.time} · ${money(o.total)}</div>
+    <div style="margin-top:10px">${NEXT[o.status].map(([t, s]) => `<button class="btn sm dark" data-id="${o.id}" data-s="${s}">${t}</button>`).join('')}</div></div>`).join('') || '<p>Замовлень немає.</p>';
+  $$('#wh-list [data-s]').forEach(b => b.onclick = () => {
+    const all = DB.get('orders', []); const o = all.find(x => x.id === +b.dataset.id); o.status = b.dataset.s; DB.set('orders', all);
+    document.getElementById('wh-msg').innerHTML = `<div class="alert ok">Замовлення №${o.id}: статус «${STATUS[o.status].label}»</div>`;
+    drawWh();
+  });
+}
+drawWh();
+</script>
+</body>
+</html>
